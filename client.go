@@ -2,11 +2,13 @@ package slack
 
 import "net/http"
 
+// Client struct for use built via constructor
 type Client struct {
-	apiURL string
-	http   http.Client
+	webhook string
+	http    http.Client
 }
 
+// New Constructor for the client
 func New(http http.Client, url string) *Client {
-	return &Client{apiURL: url, http: http}
+	return &Client{webhook: url, http: http}
 }

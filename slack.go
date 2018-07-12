@@ -10,40 +10,38 @@ import (
 )
 
 var (
-	// Info Logger
-	Info *log.Logger
-	// Warning Logger
-	Warning *log.Logger
-	// Error Logger
-	Error *log.Logger
+	infoLogger    *log.Logger
+	warningLogger *log.Logger
+	errorLogger   *log.Logger
 )
 
 func init() {
-	Info = log.New(os.Stdout,
+	infoLogger = log.New(os.Stdout,
 		"[INFO]: ",
 		log.Ldate|log.Ltime|log.Llongfile)
 
-	Warning = log.New(os.Stdout,
+	warningLogger = log.New(os.Stdout,
 		"[WARNING]: ",
 		log.Ldate|log.Ltime|log.Llongfile)
 
-	Error = log.New(os.Stderr,
+	errorLogger = log.New(os.Stderr,
 		"[ERROR]: ",
 		log.Ldate|log.Ltime|log.Llongfile)
 }
 
-func (slackClient *Client) send(incomingWebhook string, payload Payload) (string, error) {
+// Send function to post a slack payload to incoming webhook
+func (slackClient *Client) Send(payload Payload) (string, error) {
 	jsonBytes, err := json.Marshal(payload)
 	rawRequestJSON := string(jsonBytes[:])
-	req, err := http.NewRequest("POST", incomingWebhook, strings.NewReader(rawRequestJSON))
+	req, err := http.NewRequest("POST", slackClient.webhook, strings.NewReader(rawRequestJSON))
 	resp, err := slackClient.http.Do(req)
 	if err != nil {
-		Warning.Println(err)
+		warningLogger.Println(err)
 		return "", err
 	}
 	defer resp.Body.Close()
 
 	rawResponseJSON, err := ioutil.ReadAll(resp.Body)
-	Info.Printf("status_code=%s slack_response_raw=%s", resp.Status, rawResponseJSON)
+	infoLogger.Printf("status_code=%s slack_response_raw=%s", resp.Status, rawResponseJSON)
 	return resp.Status, nil
 }
